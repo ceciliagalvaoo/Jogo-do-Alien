@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <!-- Especificando a codificação de caracteres, sendo ela o conjunto UTF-8 -->
+    <meta charset="UTF-8">
+    <!-- Configurando a largura e escala da pagina para exibição-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título da Página -->
+    <title>Exercício do Alien</title>
+    <!-- Adicionando o phaser -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+     <!-- Adicionando a estilização -->
+    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
+</head>
+
+<body>
+    <!-- Configurações iniciais do Phaser-->
+    <script>
+        // variáveis para guardar altura e largura do jogo
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        // configurações do jogo
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+
+            // ativando a física do jogo
+            physics:{
+                default: 'arcade',
+                arcade:{
+                    gravity: {y: 300},
+                    debug: true
+                }
+            },
+
+            // ativando as cenas do jogo
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // iniciando um novo jogo usando phaser e considerando as configurações de config
+        const game = new Phaser.Game(config);
+        // variaveis
+        var alien;
+        var teclado;
+        var fogo;
+        var plataforma;
+        var moeda;
+        var moeda_2;
+        var pontuacao = -15;
+        var placar;
+        var tijolos_2;
+        var tijolos_3;
+        var casa_cachorro;
+        
+
+
+        // carregar os elementos do jogo
+        function preload() {
+            // carregar imagem de fundo
+            this.load.image('background', 'assets/bg.png');
+            // carregar alienigena
+            this.load.image('player',  'assets/alienigena.png');
+            // carregar turbo
+            this.load.image('turbo_nave',  'assets/turbo.png');
+            // carregar plataforma
+            this.load.image('plataforma_tijolo',  'assets/tijolos.png');
+            // carregar moeda
+            this.load.image('moeda',  'assets/moeda.png');
+            // carregar tijolos2
+            this.load.image('tijolos_2',  'assets/tijolos_2.png');
+            // carregar tijolos3
+            this.load.image('tijolos_3',  'assets/tijolos_3.png');
+            // carregar moeda
+            this.load.image('moeda_2',  'assets/moeda_2.png');
+        }
+
+
+        // adicionar e configurar os elementos do jogo
+        function create() {
+            // adicionar imagem de fundo
+            this.add.image(larguraJogo/2, alturaJogo/2, 'background');
+            // // adicionando o turbo (sprite)
+            fogo = this.add.sprite(0,0,'turbo_nave');
+            // adicionando o alienigena (sprite)
+            alien = this.physics.add.sprite(larguraJogo/2, 0, 'player');
+            // criacao de limites físicos para a borda do jogo para o alien
+            alien.setCollideWorldBounds(true);
+            // adicionando o acesso as setas do teclado
+            teclado = this.input.keyboard.createCursorKeys();
+            // adicionando plataforma
+            plataforma = this.physics.add.staticImage(larguraJogo/2, alturaJogo/2, 'plataforma_tijolo');
+            // plataforma será considerada uma barreira física para alien
+            this.physics.add.collider(alien, plataforma);
+            // adicionando moeda (sprite)
+            moeda = this.physics.add.sprite(larguraJogo/2, 0, 'moeda');
+            // adicionando moeda2 (sprite)
+            moeda_2= this.physics.add.sprite(larguraJogo/2, 0, 'moeda_2');
+            // criacao de limites físicos para a borda do jogo para a moeda
+            moeda.setCollideWorldBounds(true);
+            // movimento de "quicar" da moeda
+            moeda.setBounce(0.7);
+            // plataforma será considerada uma barreira física para a moeda
+            this.physics.add.collider(moeda, plataforma);
+            // criacao de limites físicos para a borda do jogo para a moeda2
+            moeda_2.setCollideWorldBounds(true);
+            // movimento de "quicar" da moeda2
+            moeda_2.setBounce(0.7);
+            // plataforma será considerada uma barreira física para a moeda2
+            this.physics.add.collider(moeda_2, plataforma);
+            // adicionando placar 
+            placar = this.add.text(50, 90, 'Moedas:' + pontuacao, {fontSize:'45px', fill:'#495613'});
+
+            // quando o alien encostar na moeda...
+            this.physics.add.overlap(alien, moeda, function(){
+                moeda.setVisible(false); // moeda fica invisível
+                var posicaoMoeda_Y = Phaser.Math.RND.between(50, 650); // sorteia numero
+                moeda.setPosition(posicaoMoeda_Y, 200); // ajusta a posicao da moeda
+                pontuacao +=10; // soma 10 pontos
+                placar.setText('Moedas:' + pontuacao); // atualiza texto do placar
+                moeda.setVisible(true); // ativa a visão da "nova moeda"
+            });
+
+            // quando o alien encostar na moeda2...
+            this.physics.add.overlap(alien, moeda_2, function(){
+                moeda_2.setVisible(false); // moeda fica invisível
+                var posicaoMoeda2_Y = Phaser.Math.RND.between(50, 650); // sorteia numero
+                moeda_2.setPosition(posicaoMoeda2_Y,200); // ajusta a posicao da moeda
+                pontuacao +=5; // soma 5 pontos
+                placar.setText('Moedas:' + pontuacao); // atualiza texto do placar
+                moeda_2.setVisible(true); // ativa a visão da "nova moeda"
+            });
+
+            // adicionando tijolos2
+            tijolos_2= this.physics.add.staticImage(200,550, 'tijolos_2');
+            // adicionando tijolos3
+            tijolos_3= this.physics.add.staticImage(500,300, 'tijolos_3');
+            // o tijolos2 será considerado uma barreira física para alien
+            this.physics.add.collider(alien, tijolos_2);
+            // o tijolos2 será considerado uma barreira física para moeda
+            this.physics.add.collider(moeda, tijolos_2);
+            // o tijolos2 será considerado uma barreira física para moeda2
+            this.physics.add.collider(moeda_2, tijolos_2);
+            // o tijolos3 será considerado uma barreira física para alien
+            this.physics.add.collider(alien, tijolos_3);
+            // o tijolos3 será considerado uma barreira física para moeda
+            this.physics.add.collider(moeda, tijolos_3);
+            // o tijolos3 será considerado uma barreira física para moeda2
+            this.physics.add.collider(moeda_2, tijolos_3);
+            
+    
+        }
+
+        // atualização em tempo real do jogo
+        function update() {
+            // movimento para a esquerda
+            if(teclado.left.isDown){
+                alien.setVelocityX(-150);
+            // movimento para a direita
+            } else if(teclado.right.isDown){
+                alien.setVelocityX(150);
+            //sem movimento horizontal
+            } else {
+                alien.setVelocityX(0);
+            }
+            // movimento para cima
+            if(teclado.up.isDown){
+                alien.setVelocityY(-150);
+                // turbo ativado
+                ativarTurbo();
+            // movimento para baixo
+            } else {
+                alien.setVelocityY(150);
+                semTurbo();
+            } 
+            // posicionando a posicao do turbo no alien
+            fogo.setPosition(alien.x, alien.y + alien.height/2);
+           
+        }
+        // quando o turbo sera ativado
+        function ativarTurbo(){
+            fogo.setVisible(true);
+        }
+        // quando o turbo nao sera ativado
+        function semTurbo(){
+            fogo.setVisible(false);
+        }
+
+    </script>
+
+    <!-- DESAFIO LISTA -->
+    <script>
+        var qualidades = ["gentil", "inteligente", "criativo", "brincalhão"];
+
+        console.log("Qualidades do alienígena José:");
+
+        for (var i = 0; i < qualidades.length; i++) {
+            console.log("- " + qualidades[i]);
+        }
+    </script>
+</body>
+</html>
